@@ -7,8 +7,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 public class LLM {
-    public static final String API_KEY = System.getenv("OPENAI_API_KEY"); // Ensure OpenAI API key is set
-    private static final String COURSE_NUM = "31315";  // Your course ID
+    public static final String API_KEY = System.getenv("YOUR_OPENAI_API_KEY"); // Your OpenAI API Key
+    private static final String COURSE_NUM = "12345";  // Your course ID
 
     public static void main(String[] args) {
         try {
