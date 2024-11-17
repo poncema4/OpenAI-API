@@ -6,104 +6,76 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
-class LLM {
-    public static final String API_KEY = System.getenv("AZURE_API_KEY");
+public class LLM {
+    public static final String API_KEY = System.getenv("OPENAI_API_KEY"); // Ensure OpenAI API key is set
     private static final String COURSE_NUM = "31315";  // Your course ID
 
     public static void main(String[] args) {
         try {
-            // Fetch the latest discussion post
-            String latestDiscussion = CanvasAPI.getLatestDiscussion(COURSE_NUM);
-            System.out.println("Latest Discussion Post: " + latestDiscussion);
-
-            // Fetch and extract content from the latest PDF if available
-            String pdfContent = CanvasAPI.extractPdfText();
-            System.out.println("Raw PDF Content: " + pdfContent);
-
-            // Combine discussion post and cleaned PDF content if a PDF exists
-            String prompt = latestDiscussion + "\n\nRelevant PDF Content:\n";
-
-            // Ensure the total length of the prompt doesn't exceed limits
-            if (prompt.length() > 3000) {  // Adjust this based on token limits
-                prompt = prompt.substring(0, 3000) + "...";
+            if (API_KEY == null || API_KEY.isEmpty()) {
+                throw new IllegalStateException("OpenAI API key (OPENAI_API_KEY) is not set.");
             }
 
-            // Generate response using Azure OpenAI
-            String response = generateResponse(prompt);
-            System.out.println("Response to Discussion Post: " + response);
+            // Fetch the latest discussion post
+            String[] latestDiscussionData = CanvasAPI.getLatestDiscussion(COURSE_NUM);
+            String latestDiscussion = latestDiscussionData[0];
+            String discussionTopicId = latestDiscussionData[1];
+            String latestPdf = latestDiscussionData[2];
 
-            // Post the response back to the Canvas discussion
-            postResponseToCanvas(response);
+            // Print the latest discussion post
+            System.out.println("Latest Discussion Post:\n" + latestDiscussion);
+
+            // Print the latest PDF content (if available)
+            if (latestPdf != null && !latestPdf.isEmpty()) {
+                System.out.println("Latest PDF:\n" + latestPdf);
+            } else {
+                System.out.println("No PDF attachment in the latest discussion post.");
+            }
+
+            // Generate response using OpenAI
+            String prompt = latestDiscussion + (latestPdf != null && !latestPdf.isEmpty() ? "\n\nExtracted from PDF:\n" + latestPdf : "");
+            String response = generateResponse(prompt);
+            System.out.println("Generated Response:\n" + response);
+
+            // Post the response back to Canvas
+            CanvasAPI.postResponseToCanvas(response, discussionTopicId, COURSE_NUM);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    // Generate a response using OpenAI API
     public static String generateResponse(String prompt) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
 
-        // JSON payload in chat format
+        // JSON payload for OpenAI API
         JSONObject payload = new JSONObject();
-
-        // Remove max_tokens for now (as per your requirement)
-        // payload.put("max_tokens", 100);
-
-        // Construct the messages array
         JSONArray messages = new JSONArray();
         JSONObject message = new JSONObject();
         message.put("role", "user");
         message.put("content", prompt);
         messages.put(message);
 
+        payload.put("model", "gpt-3.5-turbo");  // You can change this to "gpt-4" if needed
         payload.put("messages", messages);
 
         // Create the request
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://ai-poncema49411ai671128431104.openai.azure.com/openai/deployments/gpt-35-turbo-16k/chat/completions?api-version=2024-08-01-preview"))
+                .uri(URI.create("https://api.openai.com/v1/chat/completions"))
                 .header("Content-Type", "application/json")
-                .header("api-key", API_KEY)
+                .header("Authorization", "Bearer " + API_KEY)
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString(), StandardCharsets.UTF_8))
                 .build();
 
-        // Send the request and get the response
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            String errorMessage = response.body();
-            // Look for the specific error code indicating content policy violation
-            if (errorMessage.contains("ResponsibleAIPolicyViolation")) {
-                System.out.println("Error: Content filtered due to policy violation.");
-            }
-            throw new RuntimeException("Failed request: " + response.statusCode() + " - " + errorMessage);
+            throw new RuntimeException("Failed request: " + response.statusCode() + " - " + response.body());
         }
 
-        // Parse response
+        // Parse the OpenAI response
         JSONObject jsonResponse = new JSONObject(response.body());
         return jsonResponse.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
-    }
-
-    // Post the generated response to the Canvas discussion
-    public static void postResponseToCanvas(String response) throws Exception {
-        String url = "https://setonhall.instructure.com/api/v1/courses/" + COURSE_NUM + "/discussion_topics/";  // Add discussion topic ID here
-
-        HttpClient client = HttpClient.newHttpClient();
-        JSONObject postPayload = new JSONObject();
-        postPayload.put("message", response);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Authorization", "Bearer " + System.getenv("CANVAS_API_KEY"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(postPayload.toString(), StandardCharsets.UTF_8))
-                .build();
-
-        HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (postResponse.statusCode() != 200) {
-            throw new RuntimeException("Failed to post response: " + postResponse.statusCode() + " - " + postResponse.body());
-        }
-
-        System.out.println("Response successfully posted to Canvas.");
     }
 }
