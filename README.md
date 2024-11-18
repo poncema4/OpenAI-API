@@ -14,7 +14,7 @@ This tool allows you to interact with the OpenAI API to send queries based on th
 
     Make sure you have the latest JDK file installed and be able to run the program on your IDE before you compile it on Command Prompt
 
-2. **Proper imports stored in src folder** Download jar files here ---v
+2. **Proper imports stored in src folder** 
 
     Json https://search.maven.org/remotecontent?filepath=org/json/json/20240303/json-20240303.jar
 
