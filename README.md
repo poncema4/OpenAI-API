@@ -23,7 +23,7 @@ This tool allows you to interact with the OpenAI API to send queries based on th
    
 4. **API Key Setup**
 
-   Ensure you have your OpenAI API and Canvas API key stored as an environment variable:
+   Ensure you have your OpenAI API and Canvas API keys stored as an environment variables:
 
    Check that you have the correct keys in your environment by running this:
    ```Command Prompt
