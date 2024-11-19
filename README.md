@@ -56,7 +56,7 @@ set CLASSPATH=.;json-20230227.jar;apache-tika-1.28.5.jar
 java LLM
 ```
 
-This should be converted to a bat file now
+This should be converted to a batch (.bat) file now
 
 Now you must compile the java files in order to be able to run the program properly
 
