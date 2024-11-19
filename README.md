@@ -6,7 +6,6 @@ This tool allows you to interact with the OpenAI API to send queries based on th
 - **Java JDK**
 - **OpenAI API key**
 - **Canvas API key**
-  
 
 ## Installation
 
