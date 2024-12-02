@@ -2,7 +2,7 @@
 This tool allows you to interact with the OpenAI API to send queries based on the contents of a document and receive responses. The program reads a local document, combines it with a user-defined query, and sends it to the OpenAI API to generate a response.
 
 ## Prerequisites
-
+  
 - **Java JDK**
 - **OpenAI API key**
 - **Canvas API key**
