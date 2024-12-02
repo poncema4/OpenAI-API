@@ -8,7 +8,7 @@ This tool allows you to interact with the OpenAI API to send queries based on th
 - **Canvas API key**
    
 ## Installation
-
+   
 1. **Install Dependencies**
 
     Make sure you have the latest JDK file installed and be able to run the program on your IDE before you compile it on Command Prompt
