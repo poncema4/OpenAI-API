@@ -19,7 +19,6 @@ This tool allows you to interact with the OpenAI API to send queries based on th
 
     Apache.tika https://dlcdn.apache.org/tika/3.0.0/tika-app-3.0.0.jar
     
-   
 4. **API Key Setup**
 
    Ensure you have your OpenAI API and Canvas API keys stored as an environment variables:
