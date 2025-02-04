@@ -15,7 +15,7 @@ import org.apache.tika.sax.BodyContentHandler;
 public class CanvasAPI {
     private static final String TOKEN = System.getenv("YOUR_CANVAS_API_KEY"); // Your API Key from Canvas
     private static final String BASE_URL = "https://setonhall.instructure.com/api/v1";
-
+    
     // Fetch the files in the "Documents" folder of the course
     public static JSONArray getFilesInDocumentsFolder(String courseNum) throws Exception {
         if (TOKEN == null || TOKEN.isEmpty()) {
